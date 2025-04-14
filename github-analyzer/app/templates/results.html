@@ -20,6 +20,20 @@
     </script>
 </head>
 <body>
+    {% macro structure_tree(structure, level=0) %}
+        <ul class="tree-list" {% if level == 0 %}style="list-style-type: none; padding-left: 0;"{% endif %}>
+            {% for key, value in structure.items() %}
+                <li>
+                    {% if value is mapping %}
+                        <i class="fas fa-folder"></i> {{ key }}
+                        {{ structure_tree(value, level+1) }}
+                    {% else %}
+                        <i class="fas fa-file"></i> {{ key }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endmacro %}
     <div class="container results-container">
         <header>
             <h1><i class="fab fa-github"></i> GitHub Project Analyzer</h1>
@@ -127,7 +141,7 @@
                                 <div class="language-bar-container">
                                     <div class="language-label">{{ lang }}</div>
                                     <div class="language-bar">
-                                        <div class="language-bar-fill" style="width: {{ percentage }}%"></div>
+                                        <div class="language-bar-fill percentage-{{ percentage|int }}"></div>
                                     </div>
                                     <div class="language-percentage">{{ percentage }}%</div>
                                 </div>
@@ -275,21 +289,8 @@
         </footer>
     </div>
 
-    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+    <script src="/static/js/script.js"></script>
     
-    {% macro structure_tree(structure, level=0) %}
-        <ul class="tree-list" {% if level == 0 %}style="list-style-type: none; padding-left: 0;"{% endif %}>
-            {% for key, value in structure.items() %}
-                <li>
-                    {% if value is mapping %}
-                        <i class="fas fa-folder"></i> {{ key }}
-                        {{ structure_tree(value, level+1) }}
-                    {% else %}
-                        <i class="fas fa-file"></i> {{ key }}
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endmacro %}
+    
 </body>
 </html>

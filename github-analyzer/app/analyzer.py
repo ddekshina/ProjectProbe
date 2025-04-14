@@ -101,7 +101,8 @@ class ProjectAnalyzer:
             stats.append(f"{repo_info['stars']} stars")
         if repo_info.get("forks"):
             stats.append(f"{repo_info['forks']} forks")
-        
+            
+        summary = summary or ""
         if stats:
             summary += f" This project has {', '.join(stats)}."
         

@@ -7,9 +7,9 @@ import os
 import logging
 from typing import Optional
 
-from app.models import RepositoryUrl, AnalysisResult
-from app.github_client import GitHubClient
-from app.analyzer import ProjectAnalyzer
+from .models import RepositoryUrl, AnalysisResult
+from .github_client import GitHubClient
+from .analyzer import ProjectAnalyzer
 
 # Setup logging
 logging.basicConfig(
