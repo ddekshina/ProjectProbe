@@ -1,0 +1,295 @@
+<!-- app/templates/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add highlight.js for code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container results-container">
+        <header>
+            <h1><i class="fab fa-github"></i> GitHub Project Analyzer</h1>
+            <div class="repo-info">
+                <h2>
+                    <a href="{{ repo_url }}" target="_blank" class="repo-link">
+                        {{ result.repo_info.name }}
+                    </a>
+                </h2>
+                <div class="repo-stats">
+                    <span><i class="fas fa-star"></i> {{ result.repo_info.stars }}</span>
+                    <span><i class="fas fa-code-branch"></i> {{ result.repo_info.forks }}</span>
+                    <span><i class="fas fa-eye"></i> {{ result.repo_info.watchers }}</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="results-main">
+            <nav class="tab-navigation">
+                <button class="tab-button active" data-tab="summary">Summary</button>
+                <button class="tab-button" data-tab="structure">Structure</button>
+                <button class="tab-button" data-tab="languages">Languages</button>
+                <button class="tab-button" data-tab="features">Features</button>
+                <button class="tab-button" data-tab="code">Sample Code</button>
+                <button class="tab-button" data-tab="contributors">Contributors</button>
+                <button class="tab-button" data-tab="setup">Setup</button>
+                <button class="tab-button" data-tab="readme">README</button>
+            </nav>
+            
+            <div class="tab-content">
+                <!-- Summary Tab -->
+                <div class="tab-pane active" id="summary">
+                    <div class="summary-header card">
+                        <img src="{{ result.repo_info.owner.avatar_url }}" alt="Owner avatar" class="avatar">
+                        <div class="summary-header-info">
+                            <h3>{{ result.repo_info.full_name }}</h3>
+                            <p>{{ result.description.summary }}</p>
+                            <div class="meta-info">
+                                <span><i class="fas fa-calendar"></i> Created: {{ result.repo_info.created_at[:10] }}</span>
+                                <span><i class="fas fa-language"></i> Main: {{ result.repo_info.language or 'N/A' }}</span>
+                                {% if result.repo_info.license %}
+                                <span><i class="fas fa-gavel"></i> License: {{ result.repo_info.license }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if result.description.ai_enhanced %}
+                    <div class="card">
+                        <h3><i class="fas fa-robot"></i> AI Summary</h3>
+                        <div class="ai-summary">
+                            <p>{{ result.description.ai_enhanced.summary }}</p>
+                            
+                            <h4>Key Features</h4>
+                            <div class="ai-features">
+                                {{ result.description.ai_enhanced.features }}
+                            </div>
+                            
+                            <h4>Architecture Overview</h4>
+                            <p>{{ result.description.ai_enhanced.architecture }}</p>
+                            
+                            <h4>Ideal For</h4>
+                            <p>{{ result.description.ai_enhanced.use_cases }}</p>
+                            
+                            <h4>Technical Assessment</h4>
+                            <p>{{ result.description.ai_enhanced.technical_assessment }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card">
+                        <h3><i class="fas fa-code-branch"></i> Project Architecture</h3>
+                        <pre>{{ result.description.architecture }}</pre>
+                    </div>
+                    
+                    <div class="card">
+                        <h3><i class="fas fa-clipboard-check"></i> Code Quality Assessment</h3>
+                        <pre>{{ result.description.code_quality }}</pre>
+                    </div>
+                </div>
+                
+                <!-- Structure Tab -->
+                <div class="tab-pane" id="structure">
+                    <div class="card">
+                        <h3><i class="fas fa-sitemap"></i> File Structure</h3>
+                        <div class="file-tree">
+                            {{ structure_tree(result.file_structure) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Languages Tab -->
+                <div class="tab-pane" id="languages">
+                    <div class="card">
+                        <h3><i class="fas fa-language"></i> Languages Used</h3>
+                        <div class="language-chart">
+                            <div class="language-bars">
+                                {% set total = namespace(value=0) %}
+                                {% for lang, bytes in result.languages.items() %}
+                                {% set total.value = total.value + bytes %}
+                                {% endfor %}
+                                
+                                {% for lang, bytes in result.languages.items() %}
+                                {% set percentage = (bytes / total.value * 100) | round(1) %}
+                                <div class="language-bar-container">
+                                    <div class="language-label">{{ lang }}</div>
+                                    <div class="language-bar">
+                                        <div class="language-bar-fill" style="width: {{ percentage }}%"></div>
+                                    </div>
+                                    <div class="language-percentage">{{ percentage }}%</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3><i class="fas fa-tools"></i> Technologies</h3>
+                        <div class="technologies">
+                            <div class="tech-category">
+                                <h4>Languages</h4>
+                                <div class="tech-tags">
+                                    {% for tech in result.description.technologies.languages %}
+                                    <span class="tech-tag">{{ tech }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="tech-category">
+                                <h4>Frameworks</h4>
+                                <div class="tech-tags">
+                                    {% for tech in result.description.technologies.frameworks %}
+                                    <span class="tech-tag">{{ tech }}</span>
+                                    {% endfor %}
+                                    {% if not result.description.technologies.frameworks %}
+                                    <span class="tech-tag empty">None detected</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="tech-category">
+                                <h4>Libraries</h4>
+                                <div class="tech-tags">
+                                    {% for tech in result.description.technologies.libraries %}
+                                    <span class="tech-tag">{{ tech }}</span>
+                                    {% endfor %}
+                                    {% if not result.description.technologies.libraries %}
+                                    <span class="tech-tag empty">None detected</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="tech-category">
+                                <h4>Tools</h4>
+                                <div class="tech-tags">
+                                    {% for tech in result.description.technologies.tools %}
+                                    <span class="tech-tag">{{ tech }}</span>
+                                    {% endfor %}
+                                    {% if not result.description.technologies.tools %}
+                                    <span class="tech-tag empty">None detected</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features Tab -->
+                <div class="tab-pane" id="features">
+                    <div class="card">
+                        <h3><i class="fas fa-list-check"></i> Main Features</h3>
+                        <ul class="features-list">
+                            {% for feature in result.description.main_features %}
+                            <li>{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3><i class="fas fa-tag"></i> Topics</h3>
+                        <div class="topics">
+                            {% for topic in result.repo_info.topics %}
+                            <span class="topic-tag">{{ topic }}</span>
+                            {% endfor %}
+                            {% if not result.repo_info.topics %}
+                            <span class="topic-tag empty">No topics assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Code Tab -->
+                <div class="tab-pane" id="code">
+                    <div class="card">
+                        <h3><i class="fas fa-code"></i> Sample Code</h3>
+                        <div class="code-samples">
+                            {% for file_path, code in result.sample_code.items() %}
+                            <div class="code-sample">
+                                <h4>{{ file_path }}</h4>
+                                <pre><code>{{ code }}</code></pre>
+                            </div>
+                            {% endfor %}
+                            {% if not result.sample_code %}
+                            <p>No code samples available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contributors Tab -->
+                <div class="tab-pane" id="contributors">
+                    <div class="card">
+                        <h3><i class="fas fa-users"></i> Top Contributors</h3>
+                        <div class="contributors">
+                            {% for contributor in result.contributors %}
+                            <div class="contributor">
+                                <img src="{{ contributor.avatar_url }}" alt="{{ contributor.login }}" class="contributor-avatar">
+                                <div class="contributor-info">
+                                    <a href="{{ contributor.html_url }}" target="_blank" class="contributor-name">{{ contributor.login }}</a>
+                                    <span class="contributor-commits">{{ contributor.contributions }} commits</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Setup Tab -->
+                <div class="tab-pane" id="setup">
+                    <div class="card">
+                        <h3><i class="fas fa-download"></i> Setup Instructions</h3>
+                        <div class="setup-instructions">
+                            <pre>{{ result.description.setup_instructions }}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- README Tab -->
+                <div class="tab-pane" id="readme">
+                    <div class="card">
+                        <h3><i class="fas fa-book"></i> README</h3>
+                        <div class="readme-content">
+                            <pre>{{ result.readme }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p><a href="/" class="btn btn-secondary"><i class="fas fa-home"></i> Back to Home</a></p>
+            <p class="disclaimer">Not affiliated with GitHub. This is an open-source project.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+    
+    {% macro structure_tree(structure, level=0) %}
+        <ul class="tree-list" {% if level == 0 %}style="list-style-type: none; padding-left: 0;"{% endif %}>
+            {% for key, value in structure.items() %}
+                <li>
+                    {% if value is mapping %}
+                        <i class="fas fa-folder"></i> {{ key }}
+                        {{ structure_tree(value, level+1) }}
+                    {% else %}
+                        <i class="fas fa-file"></i> {{ key }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endmacro %}
+</body>
+</html>

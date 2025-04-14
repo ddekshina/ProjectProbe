@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fab fa-github"></i> GitHub Project Analyzer</h1>
+            <p class="tagline">Analyze any GitHub repository and get detailed project insights</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>Enter a GitHub Repository URL</h2>
+                
+                {% if error %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+                
+                <form action="/analyze" method="post">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="repo_url" 
+                            placeholder="https://github.com/username/repository" 
+                            required
+                            class="input-field"
+                        >
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Analyze
+                        </button>
+                    </div>
+                    <p class="hint">Example: https://github.com/fastapi-users/fastapi-users</p>
+                </form>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Code Analysis</h3>
+                    <p>Understand project structure, technologies, and code quality at a glance</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI-Powered Insights</h3>
+                    <p>Get intelligent analysis of project architecture and features</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h3>Architecture Breakdown</h3>
+                    <p>Visualize project organization and component relationships</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Created with <i class="fas fa-heart"></i> by GitHub Project Analyzer</p>
+            <p class="disclaimer">Not affiliated with GitHub. This is an open-source project.</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+</body>
+</html>
