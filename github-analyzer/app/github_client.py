@@ -147,6 +147,54 @@ class GitHubClient:
             return response.json()
         except Exception as e:
             return [{"error": str(e)}]
+    
+    def get_full_codebase(self, repo_url: str, max_file_size: int = 500000) -> Dict[str, str]:
+        """Get all code files from the repository with size limitations"""
+        parts = repo_url.rstrip('/').split('/')
+        owner = parts[-2]
+        repo_name = parts[-1]
+        
+        try:
+            repo = self.github.get_repo(f"{owner}/{repo_name}")
+            contents = repo.get_contents("")
+            
+            code_files = {}
+            self._collect_all_code_files(contents, repo, code_files, max_file_size)
+            return code_files
+        except Exception as e:
+            return {"error": str(e)}
+
+    def _collect_all_code_files(self, contents, repo, code_files: Dict[str, str], max_file_size: int, current_path=""):
+        """Recursively collects all code files from the repository"""
+        for content in contents:
+            if content.type == "dir":
+                try:
+                    new_contents = repo.get_contents(content.path)
+                    self._collect_all_code_files(new_contents, repo, code_files, max_file_size, content.path)
+                except Exception:
+                    pass  # Skip directories we can't access
+            elif content.type == "file":
+                # Skip very large files and non-code files
+                if content.size <= max_file_size and self._is_code_file(content.name):
+                    try:
+                        file_content = repo.get_contents(content.path)
+                        try:
+                            decoded_content = base64.b64decode(file_content.content).decode('utf-8')
+                            code_files[content.path] = decoded_content
+                        except UnicodeDecodeError:
+                            # Skip binary files
+                            pass
+                    except Exception:
+                        pass
+
+    def _is_code_file(self, filename: str) -> bool:
+        """Check if a file is likely to contain code"""
+        code_extensions = [
+            '.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.c', '.cpp', '.h', '.hpp',
+            '.cs', '.go', '.rs', '.rb', '.php', '.swift', '.kt', '.scala', '.sh',
+            '.html', '.css', '.scss', '.sql', '.graphql', '.yaml', '.yml', '.json'
+        ]
+        return any(filename.endswith(ext) for ext in code_extensions)
 
     def get_sample_code(self, repo_url: str, max_files: int = 3) -> Dict[str, str]:
         """Get sample code from the repository (a few important files)"""
